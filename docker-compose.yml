@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: financial-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ${DOCKER_NETWORK}
+
+  customer-service:
+    build: ./customer-service
+    container_name: financial-customer-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_R2DBC_URL: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      SPRING_R2DBC_USERNAME: ${POSTGRES_USER}
+      SPRING_R2DBC_PASSWORD: ${POSTGRES_PASS}
+      ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY}
+      JAVA_OPTS: ${JAVA_OPTS}
+    depends_on:
+      - postgres
+    networks:
+      - ${DOCKER_NETWORK}
+
+  financial-products-service:
+    build: ./financial-products-service
+    container_name: financial-products-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SPRING_R2DBC_URL: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      SPRING_R2DBC_USERNAME: ${POSTGRES_USER}
+      SPRING_R2DBC_PASSWORD: ${POSTGRES_PASS}
+      ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY}
+      JAVA_OPTS: ${JAVA_OPTS}
+    depends_on:
+      - postgres
+    networks:
+      - ${DOCKER_NETWORK}
+
+  bff-service:
+    build: ./bff-service
+    container_name: financial-bff-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+      SERVICES_CUSTOMER_BASE_URL: ${CUSTOMER_SERVICE_URL}
+      SERVICES_FINANCIAL_PRODUCTS_BASE_URL: ${FINANCIAL_PRODUCTS_SERVICE_URL}
+      OAUTH2_ISSUER_URI: ${OAUTH2_ISSUER_URI}
+      ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      JAVA_OPTS: ${JAVA_OPTS}
+    depends_on:
+      - customer-service
+      - financial-products-service
+    networks:
+      - ${DOCKER_NETWORK}
+
+volumes:
+  postgres_data:
+
+networks:
+  financial-network:
+    driver: bridge

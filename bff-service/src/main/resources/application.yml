@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: bff-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OAUTH2_ISSUER_URI}
+
+encryption:
+  aes:
+    secret-key: ${ENCRYPTION_SECRET_KEY}
+    algorithm: ${ENCRYPTION_ALGORITHM}
+
+services:
+  customer:
+    base-url: ${SERVICES_CUSTOMER_BASE_URL}
+  financial-products:
+    base-url: ${SERVICES_FINANCIAL_PRODUCTS_BASE_URL}
