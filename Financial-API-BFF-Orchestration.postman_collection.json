@@ -1,0 +1,142 @@
+{
+  "info": {
+    "name": "Financial API Microservices",
+    "_postman_id": "bff-microservices-collection",
+    "description": "Colección para testing de la API de microservicios financieros",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "BFF Service",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer Info (Encrypted)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Correlation-ID",
+                "value": "{{$randomUUID}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/customer-info/{{encrypted_code}}",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "customer-info", "{{encrypted_code}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer Service",
+      "item": [
+        {
+          "name": "Get Customer",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Correlation-ID",
+                "value": "{{$randomUUID}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8081/api/customers/CUST001",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "customers", "CUST001"]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/customers/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "customers", "health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Financial Products Service",
+      "item": [
+        {
+          "name": "Get Financial Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Correlation-ID",
+                "value": "{{$randomUUID}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8082/api/financial-products/customer/CUST001",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "financial-products", "customer", "CUST001"]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/financial-products/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "financial-products", "health"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "jwt_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0LXVzZXIiLCJzY29wZSI6WyJyZWFkOmN1c3RvbWVyIiwicmVhZDpwcm9kdWN0cyJdLCJpc3MiOiJmaW5hbmNpYWwtYXV0aC1zZXJ2ZXIiLCJleHAiOjE5NDA5OTUyMDB9.test-signature"
+    },
+    {
+      "key": "encrypted_code",
+      "value": "U2FsdGVkX19abc123..."
+    }
+  ]
+}

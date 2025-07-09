@@ -16,7 +16,7 @@ spring:
 # Configuración de cifrado para tests
 encryption:
   aes:
-    secret-key: TestSecretKey123  # Clave de test
+    secret-key: MySecretKey12345  # Clave de test
     algorithm: AES/ECB/PKCS5Padding
     charset: UTF-8
 
