@@ -1,0 +1,49 @@
+server:
+  port: 0  # Puerto aleatorio para tests
+
+spring:
+  application:
+    name: bff-service-test
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/auth/realms/test  # URL ficticia para tests
+  webflux:
+    multipart:
+      max-in-memory-size: 10MB
+
+# Configuración de cifrado para tests
+encryption:
+  aes:
+    secret-key: TestSecretKey123  # Clave de test
+    algorithm: AES/ECB/PKCS5Padding
+    charset: UTF-8
+
+# URLs de microservicios para testing
+services:
+  customer:
+    base-url: http://localhost:8081
+  financial-products:
+    base-url: http://localhost:8082
+
+# Configuración de logging para tests
+logging:
+  level:
+    root: INFO
+    com.financial.bff: DEBUG
+
+# Configuración de Actuator para tests
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      exposure:
+        include: health,info
+
+# OpenAPI/Swagger deshabilitado en tests
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
