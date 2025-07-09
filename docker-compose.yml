@@ -1,19 +1,21 @@
 version: '3.8'
 
 services:
-  # 🗄️ BASE DE DATOS POSTGRESQL
   postgres:
     image: postgres:15-alpine
     container_name: financial-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_DB: financial_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: perupcs123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=es_ES.UTF-8 --lc-ctype=es_ES.UTF-8"
     ports:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db/init.sql:/docker-entrypoint-initdb.d/01-init-database.sql
+      - ./init-db/seed-data.sql:/docker-entrypoint-initdb.d/02-seed-data.sql
     networks:
       - financial-network
     healthcheck:
@@ -21,69 +23,143 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
-  # 👥 CUSTOMER SERVICE
+  # CUSTOMER SERVICE
   customer-service:
-    build: ./customer-service
+    build:
+      context: ./customer-service
+      dockerfile: Dockerfile
     container_name: financial-customer-service
+    restart: unless-stopped
     ports:
       - "8081:8081"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      # 🔥 URLs corregidas para usar el contenedor postgres
+      SPRING_PROFILES_ACTIVE: docker
+      # 🔗 Conexión R2DBC a PostgreSQL
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/financial_db
       SPRING_R2DBC_USERNAME: admin
       SPRING_R2DBC_PASSWORD: perupcs123
+      SPRING_R2DBC_POOL_INITIAL_SIZE: 5
+      SPRING_R2DBC_POOL_MAX_SIZE: 20
+      # Configuración de encriptación
       ENCRYPTION_SECRET_KEY: MySecretKey12345
-      JAVA_OPTS: "-Xmx512m -Xms256m"
+      ENCRYPTION_ALGORITHM: AES/ECB/PKCS5Padding
+      # Actuator y monitoring
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics,prometheus
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+      # Correlation ID
+      CORRELATION_ID_HEADER: X-Correlation-ID
+      # Optimizaciones JVM
+      JAVA_OPTS: "-Xmx512m -Xms256m -XX:+UseG1GC -XX:+UseContainerSupport"
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - financial-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # 💳 FINANCIAL PRODUCTS SERVICE
+  # FINANCIAL PRODUCTS SERVICE
   financial-products-service:
-    build: ./financial-products-service
+    build:
+      context: ./financial-products-service
+      dockerfile: Dockerfile
     container_name: financial-products-service
+    restart: unless-stopped
     ports:
       - "8082:8082"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      # 🔥 URLs corregidas para usar el contenedor postgres
+      SPRING_PROFILES_ACTIVE: docker
+      # Conexión R2DBC a PostgreSQL
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/financial_db
       SPRING_R2DBC_USERNAME: admin
       SPRING_R2DBC_PASSWORD: perupcs123
+      SPRING_R2DBC_POOL_INITIAL_SIZE: 5
+      SPRING_R2DBC_POOL_MAX_SIZE: 20
+      # Configuración de encriptación
       ENCRYPTION_SECRET_KEY: MySecretKey12345
-      JAVA_OPTS: "-Xmx512m -Xms256m"
+      ENCRYPTION_ALGORITHM: AES/ECB/PKCS5Padding
+      # Actuator y monitoring
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics,prometheus
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+      # Correlation ID
+      CORRELATION_ID_HEADER: X-Correlation-ID
+      #  Optimizaciones JVM
+      JAVA_OPTS: "-Xmx512m -Xms256m -XX:+UseG1GC -XX:+UseContainerSupport"
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - financial-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # 🌐 BFF SERVICE
+  # BFF SERVICE (Backend for Frontend)
   bff-service:
-    build: ./bff-service
+    build:
+      context: ./bff-service
+      dockerfile: Dockerfile
     container_name: financial-bff-service
+    restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      # 🔥 URLs corregidas para usar los nombres de contenedores
+      SPRING_PROFILES_ACTIVE: docker
+      # URLs de microservicios internos
       SERVICES_CUSTOMER_BASE_URL: http://customer-service:8081
       SERVICES_FINANCIAL_PRODUCTS_BASE_URL: http://financial-products-service:8082
+      # Configuración de encriptación
       ENCRYPTION_SECRET_KEY: MySecretKey12345
-      JAVA_OPTS: "-Xmx512m -Xms256m"
+      ENCRYPTION_ALGORITHM: AES/ECB/PKCS5Padding
+      # OAuth2 y JWT (para futura implementación)
+      JWT_SECRET: myJwtSecretKeyForDevelopment123456789
+      OAUTH2_ISSUER_URI: http://keycloak:8080/realms/financial
+      # Actuator y monitoring
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics,prometheus
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+      # Correlation ID
+      CORRELATION_ID_HEADER: X-Correlation-ID
+      # OpenAPI/Swagger
+      SPRINGDOC_API_DOCS_ENABLED: true
+      SPRINGDOC_SWAGGER_UI_ENABLED: true
+      # Optimizaciones JVM
+      JAVA_OPTS: "-Xmx512m -Xms256m -XX:+UseG1GC -XX:+UseContainerSupport"
+      # WebFlux configuración
+      SPRING_WEBFLUX_MULTIPART_MAX_IN_MEMORY_SIZE: 10MB
     depends_on:
-      - customer-service
-      - financial-products-service
+      customer-service:
+        condition: service_healthy
+      financial-products-service:
+        condition: service_healthy
     networks:
       - financial-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
+# VOLÚMENES PERSISTENTES
 volumes:
   postgres_data:
+    driver: local
+    name: financial_postgres_data
 
+# RED
 networks:
   financial-network:
     driver: bridge
+    name: financial-network
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
