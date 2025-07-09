@@ -5,7 +5,6 @@ import com.financial.products.entity.FinancialProduct;
 import com.financial.products.repository.FinancialProductRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;

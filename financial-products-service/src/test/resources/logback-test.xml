@@ -1,0 +1,22 @@
+<configuration>
+    <!-- Console appender para tests -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger específico para tests de Financial Products Service -->
+    <logger name="com.financial.products" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <!-- Logger para R2DBC (silenciar durante tests) -->
+    <logger name="org.springframework.r2dbc" level="WARN" />
+    <logger name="io.r2dbc" level="WARN" />
+
+    <!-- Root logger -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

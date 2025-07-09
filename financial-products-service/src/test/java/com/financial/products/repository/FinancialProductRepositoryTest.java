@@ -30,7 +30,7 @@ class FinancialProductRepositoryTest {
     @BeforeEach
     void setUp() {
         cuentaAhorro = FinancialProduct.builder()
-                .codigoUnico("TEST001")
+                .codigoUnico("CUST001")
                 .tipoProducto(FinancialProduct.TipoProducto.CUENTA_AHORRO)
                 .nombre("Cuenta Ahorro Test")
                 .saldo(new BigDecimal("5000.00"))

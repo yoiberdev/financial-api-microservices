@@ -1,8 +1,8 @@
 package com.financial.common.util;
 
-import com.financial.common.exception.EncryptionException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
 
@@ -44,23 +44,24 @@ public final class EncryptionUtils {
         }
 
         try {
-            // Try both regular and URL-safe Base64 decoders
+            String padded = padBase64(input);
+            Base64.getUrlDecoder().decode(padded);
+            return true;
+        } catch (IllegalArgumentException e) {
             try {
-                Base64.getUrlDecoder().decode(input);
+                String padded = padBase64(input);
+                Base64.getDecoder().decode(padded);
                 return true;
-            } catch (IllegalArgumentException e1) {
-                try {
-                    Base64.getDecoder().decode(input);
-                    return true;
-                } catch (IllegalArgumentException e2) {
-                    log.debug("Invalid Base64 format: {}", e2.getMessage());
-                    return false;
-                }
+            } catch (IllegalArgumentException ex) {
+                log.debug("Invalid Base64 format: {}", ex.getMessage());
+                return false;
             }
-        } catch (Exception e) {
-            log.debug("Error validating Base64: {}", e.getMessage());
-            return false;
         }
+    }
+
+    private static String padBase64(String input) {
+        int padding = (4 - input.length() % 4) % 4;
+        return input + "=".repeat(padding);
     }
 
     /**
@@ -71,7 +72,7 @@ public final class EncryptionUtils {
             return false;
         }
 
-        int length = key.getBytes().length;
+        int length = key.getBytes(StandardCharsets.UTF_8).length;
         return length == 16 || length == 24 || length == 32;
     }
 

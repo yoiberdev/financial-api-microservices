@@ -45,7 +45,12 @@ public class CustomerInfoOrchestrationService {
 
             return decryptCodigoUnico(encryptedCodigoUnico, correlationId)
                     .flatMap(codigoUnico -> orchestrateServiceCalls(codigoUnico, correlationId))
-                    .contextWrite(Context.of("correlationId", correlationId))
+                    .contextWrite(context -> {
+                        if (correlationId != null) {
+                            return context.put("correlationId", correlationId);
+                        }
+                        return context;
+                    })
                     .timeout(Duration.ofSeconds(10))
                     .doOnSuccess(response -> log.info("Customer info orchestration completed successfully - {}", correlationId))
                     .doOnError(error -> log.error("Customer info orchestration failed: {} - {}", error.getMessage(), correlationId));

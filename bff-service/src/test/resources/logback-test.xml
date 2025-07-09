@@ -1,0 +1,24 @@
+<configuration>
+    <!-- Console appender para tests -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger específico para tests de BFF Service -->
+    <logger name="com.financial.bff" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <!-- Logger para WebClient (útil para debugging) -->
+    <logger name="org.springframework.web.reactive.function.client" level="WARN" />
+
+    <!-- Logger para MockWebServer -->
+    <logger name="okhttp3.mockwebserver" level="WARN" />
+
+    <!-- Root logger -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

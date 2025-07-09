@@ -2,53 +2,141 @@ package com.financial.customer.controller;
 
 import com.financial.customer.dto.CustomerResponseDTO;
 import com.financial.customer.service.CustomerService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 /**
- * Controlador REST para Customer Service
+ * Tests de integración para CustomerController
  */
-@RestController
-@RequestMapping("/api/customers")
-@Slf4j
-@Tag(name = "Customer API", description = "API para gestión de clientes")
-public class CustomerController {
+@WebFluxTest(CustomerController.class)
+@DisplayName("Customer Controller Integration Tests")
+class CustomerControllerTest {
 
-    private final CustomerService customerService;
+    @Autowired
+    private WebTestClient webTestClient;
 
-    public CustomerController(CustomerService customerService) {
-        this.customerService = customerService;
+    @Autowired
+    private CustomerService customerService;
+
+    @TestConfiguration
+    static class MockConfig {
+        @Bean
+        public CustomerService customerService() {
+            return Mockito.mock(CustomerService.class);
+        }
     }
 
-    @GetMapping("/{codigoUnico}")
-    @Operation(
-            summary = "Obtener cliente por código único",
-            description = "Busca y retorna la información básica de un cliente usando su código único"
-    )
-    public Mono<ResponseEntity<CustomerResponseDTO>> getCustomer(
-            @Parameter(description = "Código único del cliente", required = true)
-            @PathVariable String codigoUnico,
+    private CustomerResponseDTO testCustomerResponse;
 
-            @Parameter(description = "ID de correlación para tracking")
-            @RequestHeader(value = "Correlation-ID", required = false) String correlationId) {
-
-        log.info("Received request for customer: {} with correlation-id: {}",
-                codigoUnico, correlationId);
-
-        return customerService.getCustomerByCodigoUnico(codigoUnico)
-                .map(ResponseEntity::ok)
-                .doOnSuccess(response -> log.info("Customer request completed successfully - {}", correlationId))
-                .onErrorReturn(ResponseEntity.notFound().build());
+    @BeforeEach
+    void setUp() {
+        testCustomerResponse = CustomerResponseDTO.builder()
+                .nombres("Juan Carlos")
+                .apellidos("Pérez García")
+                .tipoDocumento("DNI")
+                .numeroDocumento("12345678")
+                .build();
     }
 
-    @GetMapping("/health")
-    @Operation(summary = "Health check", description = "Verifica que el servicio esté funcionando")
-    public Mono<ResponseEntity<String>> health() {
-        return Mono.just(ResponseEntity.ok("Customer Service is UP"));
+    @Test
+    @DisplayName("Should return customer when valid codigo unico provided")
+    void shouldReturnCustomerWhenValidCodigoUnicoProvided() {
+        // Given
+        when(customerService.getCustomerByCodigoUnico("CUST001"))
+                .thenReturn(Mono.just(testCustomerResponse));
+
+        // When & Then
+        webTestClient.get()
+                .uri("/api/customers/CUST001")
+                .header("Correlation-ID", "test-123")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CustomerResponseDTO.class)
+                .value(response -> {
+                    assert response.getNombres().equals("Juan Carlos");
+                    assert response.getApellidos().equals("Pérez García");
+                    assert response.getTipoDocumento().equals("DNI");
+                    assert response.getNumeroDocumento().equals("12345678");
+                });
+    }
+
+    @Test
+    @DisplayName("Should return 404 when customer not found")
+    void shouldReturn404WhenCustomerNotFound() {
+        // Given
+        when(customerService.getCustomerByCodigoUnico("NONEXISTENT"))
+                .thenReturn(Mono.error(new RuntimeException("Customer not found")));
+
+        // When & Then
+        webTestClient.get()
+                .uri("/api/customers/NONEXISTENT")
+                .header("Correlation-ID", "test-404")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    @DisplayName("Should return customer without correlation ID header")
+    void shouldReturnCustomerWithoutCorrelationIdHeader() {
+        // Given
+        when(customerService.getCustomerByCodigoUnico("CUST001"))
+                .thenReturn(Mono.just(testCustomerResponse));
+
+        // When & Then
+        webTestClient.get()
+                .uri("/api/customers/CUST001")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CustomerResponseDTO.class)
+                .value(response -> {
+                    assert response.getNombres().equals("Juan Carlos");
+                });
+    }
+
+    @Test
+    @DisplayName("Should handle service errors gracefully")
+    void shouldHandleServiceErrorsGracefully() {
+        // Given
+        when(customerService.getCustomerByCodigoUnico(anyString()))
+                .thenReturn(Mono.error(new RuntimeException("Internal service error")));
+
+        // When & Then
+        webTestClient.get()
+                .uri("/api/customers/ERROR_CASE")
+                .header("Correlation-ID", "test-error")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound(); // Debido al onErrorReturn en el controller
+    }
+
+    @Test
+    @DisplayName("Should return health check successfully")
+    void shouldReturnHealthCheckSuccessfully() {
+        // When & Then
+        webTestClient.get()
+                .uri("/api/customers/health")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .value(response -> {
+                    assert response.equals("Customer Service is UP");
+                });
     }
 }

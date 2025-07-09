@@ -22,7 +22,6 @@ public class SecurityConfig {
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        // 🔥 PERMITIR TODOS LOS ENDPOINTS PARA DESARROLLO
                         .anyExchange().permitAll())
                 .build();
     }
