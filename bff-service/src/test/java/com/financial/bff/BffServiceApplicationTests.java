@@ -9,7 +9,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestMockConfig.class) // 👈 esto importa el mock manualmente
+@Import(TestMockConfig.class)
 @TestPropertySource(properties = {
 		"spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8080/auth/realms/test",
 		"services.customer.base-url=http://localhost:8081",

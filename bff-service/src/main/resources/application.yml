@@ -25,9 +25,9 @@ encryption:
 # URLs de microservicios
 services:
   customer:
-    base-url: ${SERVICES_CUSTOMER_BASE_URL:http://customer-service:8081}
+    base-url: ${SERVICES_CUSTOMER_BASE_URL:http://localhost:8081}
   financial-products:
-    base-url: ${SERVICES_FINANCIAL_PRODUCTS_BASE_URL:http://financial-products-service:8082}
+    base-url: ${SERVICES_FINANCIAL_PRODUCTS_BASE_URL:http://localhost:8082}
 
 # Configuración de logging
 logging:
