@@ -1,12 +1,14 @@
 package com.financial.customer.entity;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
@@ -14,13 +16,13 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("customers")
+@Table("customers") // 🔥 IMPORTANTE: Nombre de tabla
 public class Customer {
 
     @Id
     private Long id;
 
-    @Column("codigo_unico")
+    @Column("codigo_unico") // 🔥 IMPORTANTE: Mapear columnas
     private String codigoUnico;
 
     @Column("nombres")
@@ -35,9 +37,11 @@ public class Customer {
     @Column("numero_documento")
     private String numeroDocumento;
 
+    @CreatedDate
     @Column("created_at")
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
     @Column("updated_at")
     private LocalDateTime updatedAt;
 }

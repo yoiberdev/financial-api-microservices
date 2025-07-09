@@ -1,7 +1,6 @@
-package com.financial.products.repository.integration;
+package com.financial.products.repository;
 
 import com.financial.products.entity.FinancialProduct;
-import com.financial.products.repository.FinancialProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
