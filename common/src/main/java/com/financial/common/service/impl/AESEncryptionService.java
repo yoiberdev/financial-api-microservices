@@ -1,0 +1,87 @@
+package com.financial.common.service.impl;
+
+import com.financial.common.exception.EncryptionException;
+import com.financial.common.service.EncryptionService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+@Service
+@Slf4j
+public class AESEncryptionService implements EncryptionService {
+
+    private final String secretKey;
+    private final String algorithm;
+
+    public AESEncryptionService(
+            @Value("${encryption.aes.secret-key}") String secretKey,
+            @Value("${encryption.aes.algorithm:AES/ECB/PKCS5Padding}") String algorithm) {
+        this.secretKey = secretKey;
+        this.algorithm = algorithm;
+        validateKey();
+    }
+
+    @Override
+    public String encrypt(String data) {
+        try {
+            log.debug("Encrypting data with AES algorithm");
+
+            Cipher cipher = Cipher.getInstance(algorithm);
+            SecretKeySpec keySpec = new SecretKeySpec(
+                    secretKey.getBytes(StandardCharsets.UTF_8), "AES");
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+
+            byte[] encrypted = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            String result = Base64.getEncoder().encodeToString(encrypted);
+
+            log.debug("Data encrypted successfully");
+            return result;
+
+        } catch (Exception e) {
+            log.error("Error encrypting data: {}", e.getMessage());
+            throw new EncryptionException("Failed to encrypt data", e);
+        }
+    }
+
+    @Override
+    public String decrypt(String encryptedData) {
+        try {
+            log.debug("Decrypting data with AES algorithm");
+
+            Cipher cipher = Cipher.getInstance(algorithm);
+            SecretKeySpec keySpec = new SecretKeySpec(
+                    secretKey.getBytes(StandardCharsets.UTF_8), "AES");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec);
+
+            byte[] decoded = Base64.getDecoder().decode(encryptedData);
+            byte[] decrypted = cipher.doFinal(decoded);
+            String result = new String(decrypted, StandardCharsets.UTF_8);
+
+            log.debug("Data decrypted successfully");
+            return result;
+
+        } catch (Exception e) {
+            log.error("Error decrypting data: {}", e.getMessage());
+            throw new EncryptionException("Failed to decrypt data", e);
+        }
+    }
+
+    private void validateKey() {
+        if (secretKey == null || secretKey.trim().isEmpty()) {
+            throw new EncryptionException("Secret key cannot be null or empty");
+        }
+
+        int keyLength = secretKey.getBytes(StandardCharsets.UTF_8).length;
+        if (keyLength != 16 && keyLength != 24 && keyLength != 32) {
+            throw new EncryptionException(
+                    "AES key must be 16, 24, or 32 bytes long. Current length: " + keyLength);
+        }
+
+        log.info("AES encryption service initialized with {}-bit key", keyLength * 8);
+    }
+}
