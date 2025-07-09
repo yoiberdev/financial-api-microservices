@@ -1,3 +1,7 @@
+// ==========================================
+// ARCHIVO: common/src/main/java/com/financial/common/service/impl/AESEncryptionService.java
+// ==========================================
+
 package com.financial.common.service.impl;
 
 import com.financial.common.exception.EncryptionException;
@@ -37,9 +41,11 @@ public class AESEncryptionService implements EncryptionService {
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
 
             byte[] encrypted = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            String result = Base64.getEncoder().encodeToString(encrypted);
 
-            log.debug("Data encrypted successfully");
+            // 🔥 CAMBIO PRINCIPAL: Usar Base64 URL-safe
+            String result = Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted);
+
+            log.debug("Data encrypted successfully (URL-safe)");
             return result;
 
         } catch (Exception e) {
@@ -58,11 +64,12 @@ public class AESEncryptionService implements EncryptionService {
                     secretKey.getBytes(StandardCharsets.UTF_8), "AES");
             cipher.init(Cipher.DECRYPT_MODE, keySpec);
 
-            byte[] decoded = Base64.getDecoder().decode(encryptedData);
+            // 🔥 CAMBIO PRINCIPAL: Usar Base64 URL-safe decoder
+            byte[] decoded = Base64.getUrlDecoder().decode(encryptedData);
             byte[] decrypted = cipher.doFinal(decoded);
             String result = new String(decrypted, StandardCharsets.UTF_8);
 
-            log.debug("Data decrypted successfully");
+            log.debug("Data decrypted successfully (URL-safe)");
             return result;
 
         } catch (Exception e) {
@@ -82,6 +89,6 @@ public class AESEncryptionService implements EncryptionService {
                     "AES key must be 16, 24, or 32 bytes long. Current length: " + keyLength);
         }
 
-        log.info("AES encryption service initialized with {}-bit key", keyLength * 8);
+        log.info("AES encryption service initialized with {}-bit key (URL-safe)", keyLength * 8);
     }
 }

@@ -7,8 +7,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 /**
- * Utility class for encryption-related operations
- * Following utility pattern and static helper methods
+ * Utility class for encryption-related operations with URL-safe Base64
  */
 @Slf4j
 public final class EncryptionUtils {
@@ -21,9 +20,7 @@ public final class EncryptionUtils {
     }
 
     /**
-     * Generates a random AES key of specified length
-     * @param keyLength the length in bytes (16, 24, or 32)
-     * @return Base64 encoded random key
+     * Generates a random AES key of specified length (URL-safe)
      */
     public static String generateRandomKey(int keyLength) {
         if (keyLength != 16 && keyLength != 24 && keyLength != 32) {
@@ -34,14 +31,12 @@ public final class EncryptionUtils {
         byte[] keyBytes = new byte[keyLength];
         SECURE_RANDOM.nextBytes(keyBytes);
 
-        log.debug("Generated random AES key of {} bytes", keyLength);
-        return Base64.getEncoder().encodeToString(keyBytes);
+        log.debug("Generated random AES key of {} bytes (URL-safe)", keyLength);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(keyBytes);
     }
 
     /**
-     * Validates if a string is a valid Base64 encoded value
-     * @param input the string to validate
-     * @return true if valid Base64, false otherwise
+     * Validates if a string is a valid URL-safe Base64 encoded value
      */
     public static boolean isValidBase64(String input) {
         if (input == null || input.trim().isEmpty()) {
@@ -49,18 +44,27 @@ public final class EncryptionUtils {
         }
 
         try {
-            Base64.getDecoder().decode(input);
-            return true;
-        } catch (IllegalArgumentException e) {
-            log.debug("Invalid Base64 format: {}", e.getMessage());
+            // Try both regular and URL-safe Base64 decoders
+            try {
+                Base64.getUrlDecoder().decode(input);
+                return true;
+            } catch (IllegalArgumentException e1) {
+                try {
+                    Base64.getDecoder().decode(input);
+                    return true;
+                } catch (IllegalArgumentException e2) {
+                    log.debug("Invalid Base64 format: {}", e2.getMessage());
+                    return false;
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Error validating Base64: {}", e.getMessage());
             return false;
         }
     }
 
     /**
      * Validates if the provided key has a valid length for AES encryption
-     * @param key the key to validate
-     * @return true if valid, false otherwise
      */
     public static boolean isValidAESKeyLength(String key) {
         if (key == null) {
@@ -73,8 +77,6 @@ public final class EncryptionUtils {
 
     /**
      * Sanitizes input for logging purposes (removes sensitive data)
-     * @param input the input to sanitize
-     * @return sanitized string for safe logging
      */
     public static String sanitizeForLogging(String input) {
         if (input == null || input.length() <= 8) {

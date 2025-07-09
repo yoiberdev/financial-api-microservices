@@ -15,8 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Enhanced AES implementation with comprehensive validation
- * Following Decorator pattern to add validation layer
+ * Enhanced AES implementation with URL-safe Base64 encoding
  */
 @Service
 @Primary
@@ -39,7 +38,7 @@ public class EnhancedAESEncryptionService implements EncryptionService {
 
     @Override
     public String encrypt(String data) {
-        log.info("Starting encryption process");
+        log.info("Starting encryption process (URL-safe)");
 
         try {
             // Pre-validation
@@ -52,15 +51,16 @@ public class EnhancedAESEncryptionService implements EncryptionService {
             cipher.init(Cipher.ENCRYPT_MODE, keySpec);
 
             byte[] encrypted = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            String result = Base64.getEncoder().encodeToString(encrypted);
 
-            log.info("Data encrypted successfully, result length: {}", result.length());
+            // 🔥 URL-safe Base64 sin padding
+            String result = Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted);
+
+            log.info("Data encrypted successfully (URL-safe), result length: {}", result.length());
             log.debug("Encrypted data preview: {}", EncryptionUtils.sanitizeForLogging(result));
 
             return result;
 
         } catch (EncryptionException e) {
-            // Re-throw validation exceptions
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error during encryption: {}", e.getMessage());
@@ -70,7 +70,7 @@ public class EnhancedAESEncryptionService implements EncryptionService {
 
     @Override
     public String decrypt(String encryptedData) {
-        log.info("Starting decryption process");
+        log.info("Starting decryption process (URL-safe)");
 
         try {
             // Pre-validation
@@ -82,20 +82,20 @@ public class EnhancedAESEncryptionService implements EncryptionService {
                     secretKey.getBytes(StandardCharsets.UTF_8), "AES");
             cipher.init(Cipher.DECRYPT_MODE, keySpec);
 
-            byte[] decoded = Base64.getDecoder().decode(encryptedData);
+            // 🔥 URL-safe Base64 decoder
+            byte[] decoded = Base64.getUrlDecoder().decode(encryptedData);
             byte[] decrypted = cipher.doFinal(decoded);
             String result = new String(decrypted, StandardCharsets.UTF_8);
 
             // Post-validation
             validationService.validateCodigoUnico(result);
 
-            log.info("Data decrypted successfully, result length: {}", result.length());
+            log.info("Data decrypted successfully (URL-safe), result length: {}", result.length());
             log.debug("Decrypted data preview: {}", EncryptionUtils.sanitizeForLogging(result));
 
             return result;
 
         } catch (EncryptionException e) {
-            // Re-throw validation exceptions
             throw e;
         } catch (Exception e) {
             log.error("Unexpected error during decryption: {}", e.getMessage());
@@ -136,7 +136,7 @@ public class EnhancedAESEncryptionService implements EncryptionService {
         }
 
         int keyLength = secretKey.getBytes(StandardCharsets.UTF_8).length;
-        log.info("Enhanced AES encryption service initialized successfully with {}-bit key", keyLength * 8);
+        log.info("Enhanced AES encryption service initialized successfully with {}-bit key (URL-safe)", keyLength * 8);
     }
 
     /**
@@ -149,7 +149,7 @@ public class EnhancedAESEncryptionService implements EncryptionService {
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
 
         byte[] encrypted = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(encrypted);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted);
     }
 
     /**
@@ -161,7 +161,7 @@ public class EnhancedAESEncryptionService implements EncryptionService {
                 secretKey.getBytes(StandardCharsets.UTF_8), "AES");
         cipher.init(Cipher.DECRYPT_MODE, keySpec);
 
-        byte[] decoded = Base64.getDecoder().decode(encryptedData);
+        byte[] decoded = Base64.getUrlDecoder().decode(encryptedData);
         byte[] decrypted = cipher.doFinal(decoded);
         return new String(decrypted, StandardCharsets.UTF_8);
     }

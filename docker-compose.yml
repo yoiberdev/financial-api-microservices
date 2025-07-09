@@ -1,73 +1,85 @@
 version: '3.8'
 
 services:
+  # 🗄️ BASE DE DATOS POSTGRESQL
   postgres:
     image: postgres:15-alpine
     container_name: financial-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+      POSTGRES_DB: financial_db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: perupcs123
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init-db/01-init-database.sql:/docker-entrypoint-initdb.d/01-init-database.sql
+      - ./init-db/init.sql:/docker-entrypoint-initdb.d/01-init-database.sql
     networks:
-      - ${DOCKER_NETWORK}
+      - financial-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d financial_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # 👥 CUSTOMER SERVICE
   customer-service:
     build: ./customer-service
     container_name: financial-customer-service
     ports:
       - "8081:8081"
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      SPRING_R2DBC_URL: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      SPRING_R2DBC_USERNAME: ${POSTGRES_USER}
-      SPRING_R2DBC_PASSWORD: ${POSTGRES_PASS}
-      ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY}
-      JAVA_OPTS: ${JAVA_OPTS}
+      SPRING_PROFILES_ACTIVE: dev
+      # 🔥 URLs corregidas para usar el contenedor postgres
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/financial_db
+      SPRING_R2DBC_USERNAME: admin
+      SPRING_R2DBC_PASSWORD: perupcs123
+      ENCRYPTION_SECRET_KEY: MySecretKey12345
+      JAVA_OPTS: "-Xmx512m -Xms256m"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
-      - ${DOCKER_NETWORK}
+      - financial-network
 
+  # 💳 FINANCIAL PRODUCTS SERVICE
   financial-products-service:
     build: ./financial-products-service
     container_name: financial-products-service
     ports:
       - "8082:8082"
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      SPRING_R2DBC_URL: r2dbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
-      SPRING_R2DBC_USERNAME: ${POSTGRES_USER}
-      SPRING_R2DBC_PASSWORD: ${POSTGRES_PASS}
-      ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY}
-      JAVA_OPTS: ${JAVA_OPTS}
+      SPRING_PROFILES_ACTIVE: dev
+      # 🔥 URLs corregidas para usar el contenedor postgres
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/financial_db
+      SPRING_R2DBC_USERNAME: admin
+      SPRING_R2DBC_PASSWORD: perupcs123
+      ENCRYPTION_SECRET_KEY: MySecretKey12345
+      JAVA_OPTS: "-Xmx512m -Xms256m"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
-      - ${DOCKER_NETWORK}
+      - financial-network
 
+  # 🌐 BFF SERVICE
   bff-service:
     build: ./bff-service
     container_name: financial-bff-service
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-      SERVICES_CUSTOMER_BASE_URL: ${CUSTOMER_SERVICE_URL}
-      SERVICES_FINANCIAL_PRODUCTS_BASE_URL: ${FINANCIAL_PRODUCTS_SERVICE_URL}
-      OAUTH2_ISSUER_URI: ${OAUTH2_ISSUER_URI}
-      ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY}
-      JWT_SECRET: ${JWT_SECRET}
-      JAVA_OPTS: ${JAVA_OPTS}
+      SPRING_PROFILES_ACTIVE: dev
+      # 🔥 URLs corregidas para usar los nombres de contenedores
+      SERVICES_CUSTOMER_BASE_URL: http://customer-service:8081
+      SERVICES_FINANCIAL_PRODUCTS_BASE_URL: http://financial-products-service:8082
+      ENCRYPTION_SECRET_KEY: MySecretKey12345
+      JAVA_OPTS: "-Xmx512m -Xms256m"
     depends_on:
       - customer-service
       - financial-products-service
     networks:
-      - ${DOCKER_NETWORK}
+      - financial-network
 
 volumes:
   postgres_data:

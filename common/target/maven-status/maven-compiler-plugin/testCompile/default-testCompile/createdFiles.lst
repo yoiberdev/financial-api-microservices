@@ -1,2 +1,3 @@
 com\financial\common\service\EncryptionServiceIntegrationTest.class
 com\financial\common\service\impl\AESEncryptionServiceTest.class
+com\financial\common\service\impl\EncryptionTestScript.class
