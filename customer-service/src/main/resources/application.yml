@@ -1,10 +1,48 @@
-spring:
-  r2dbc:
-    url: ${SPRING_R2DBC_URL}
-    username: ${SPRING_R2DBC_USERNAME}
-    password: ${SPRING_R2DBC_PASSWORD}
+server:
+  port: 8081
 
+spring:
+  application:
+    name: customer-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  r2dbc:
+    url: ${SPRING_R2DBC_URL:r2dbc:postgresql://161.132.51.231:5432/financial_db}
+    username: ${SPRING_R2DBC_USERNAME:admin}
+    password: ${SPRING_R2DBC_PASSWORD:perupcs123}
+    pool:
+      initial-size: ${R2DBC_POOL_INITIAL_SIZE:5}
+      max-size: ${R2DBC_POOL_MAX_SIZE:20}
+      max-idle-time: 30m
+      validation-query: SELECT 1
+
+# Configuración de cifrado
 encryption:
   aes:
-    secret-key: ${ENCRYPTION_SECRET_KEY}
-    algorithm: ${ENCRYPTION_ALGORITHM}
+    secret-key: ${ENCRYPTION_SECRET_KEY:MySecretKey12345}
+    algorithm: ${ENCRYPTION_ALGORITHM:AES/ECB/PKCS5Padding}
+    charset: ${ENCRYPTION_CHARSET:UTF-8}
+
+# Configuración de logging
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:INFO}
+    com.financial.customer: ${LOGGING_LEVEL_COM_FINANCIAL:DEBUG}
+    org.springframework.r2dbc: DEBUG
+    io.r2dbc.postgresql.QUERY: DEBUG
+
+# Configuración de Actuator
+management:
+  endpoints:
+    enabled-by-default: ${MANAGEMENT_ENDPOINTS_ENABLED:true}
+    web:
+      exposure:
+        include: ${ACTUATOR_EXPOSE:health,info,metrics}
+  endpoint:
+    health:
+      show-details: always
+
+# WebFlux configuration
+spring.webflux:
+  multipart:
+    max-in-memory-size: ${WEBFLUX_MAX_IN_MEMORY_SIZE:10MB}
