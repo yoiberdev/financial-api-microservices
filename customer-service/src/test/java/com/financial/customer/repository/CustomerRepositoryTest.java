@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @DataR2dbcTest
-@ActiveProfiles("test") // 🔥 AGREGAR PROFILE
+@ActiveProfiles("test")
 @TestPropertySource(properties = {
         "spring.r2dbc.url=r2dbc:h2:mem:///testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE",
         "spring.r2dbc.username=sa",
@@ -30,7 +30,6 @@ class CustomerRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        // 🔥 USAR REACTIVE CLEANUP
         customerRepository.deleteAll().block(Duration.ofSeconds(5));
 
         testCustomer = Customer.builder()
