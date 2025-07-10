@@ -15,7 +15,6 @@
     <description>Reactive Customer microservice</description>
 
     <dependencies>
-        <!-- Common module dependency for shared utilities -->
         <dependency>
             <groupId>com.financial</groupId>
             <artifactId>common</artifactId>

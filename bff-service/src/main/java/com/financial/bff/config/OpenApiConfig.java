@@ -23,10 +23,7 @@ public class OpenApiConfig {
                 .info(new Info()
                         .title("Financial BFF API")
                         .description("Backend for Frontend que orquesta microservicios de clientes y productos financieros")
-                        .version("1.0.0")
-                        .contact(new Contact()
-                                .name("Equipo de Desarrollo")
-                                .email("desarrollo@financial.com")))
+                        .version("1.0.0"))
                 .servers(List.of(
                         new Server()
                                 .url("http://localhost:8080")

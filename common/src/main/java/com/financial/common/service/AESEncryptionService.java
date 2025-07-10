@@ -1,7 +1,3 @@
-// ==========================================
-// ARCHIVO: common/src/main/java/com/financial/common/service/impl/AESEncryptionService.java
-// ==========================================
-
 package com.financial.common.service;
 
 import com.financial.common.exception.EncryptionException;

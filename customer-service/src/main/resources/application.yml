@@ -46,3 +46,11 @@ management:
 spring.webflux:
   multipart:
     max-in-memory-size: ${WEBFLUX_MAX_IN_MEMORY_SIZE:10MB}
+
+# OpenAPI/Swagger configuration
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_ENABLED:true}
+  swagger-ui:
+    enabled: ${SWAGGER_UI_ENABLED:true}
+    path: /swagger-ui.html
