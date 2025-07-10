@@ -1,5 +1,6 @@
 package com.financial.customer.service;
 
+import com.financial.common.annotation.Loggable;
 import com.financial.customer.dto.CustomerResponseDTO;
 import com.financial.customer.entity.Customer;
 import com.financial.customer.repository.CustomerRepository;
@@ -20,6 +21,7 @@ public class CustomerService {
         this.customerRepository = customerRepository;
     }
 
+    @Loggable(value = "Buscar cliente por código", includeArgs = true, includeResult = true)
     public Mono<CustomerResponseDTO> getCustomerByCodigoUnico(String codigoUnico) {
         log.info("Retrieving customer by codigo unico: {}", codigoUnico);
 

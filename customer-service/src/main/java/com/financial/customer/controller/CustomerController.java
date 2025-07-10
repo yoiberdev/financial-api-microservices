@@ -1,5 +1,6 @@
 package com.financial.customer.controller;
 
+import com.financial.common.annotation.Loggable;
 import com.financial.customer.dto.CustomerResponseDTO;
 import com.financial.customer.service.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +31,7 @@ public class CustomerController {
             summary = "Obtener cliente por código único",
             description = "Busca y retorna la información básica de un cliente usando su código único"
     )
+    @Loggable(value = "Endpoint obtener cliente", includeArgs = true)
     public Mono<ResponseEntity<CustomerResponseDTO>> getCustomer(
             @Parameter(description = "Código único del cliente", required = true)
             @PathVariable String codigoUnico,

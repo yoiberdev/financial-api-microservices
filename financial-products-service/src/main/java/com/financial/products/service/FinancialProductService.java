@@ -1,5 +1,6 @@
 package com.financial.products.service;
 
+import com.financial.common.annotation.Loggable;
 import com.financial.products.dto.FinancialProductResponseDTO;
 import com.financial.products.entity.FinancialProduct;
 import com.financial.products.repository.FinancialProductRepository;
@@ -22,6 +23,7 @@ public class FinancialProductService {
         this.productRepository = productRepository;
     }
 
+    @Loggable(value = "Buscar productos financieros", includeArgs = true, includeResult = true)
     public Mono<List<FinancialProductResponseDTO>> getProductsByCustomer(String codigoUnico) {
         log.info("Retrieving financial products for customer: {}", codigoUnico);
 

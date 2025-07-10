@@ -3,6 +3,7 @@ package com.financial.bff.controller;
 import com.financial.bff.dto.CustomerInfoResponse;
 import com.financial.bff.dto.ErrorResponse;
 import com.financial.bff.service.CustomerInfoOrchestrationService;
+import com.financial.common.annotation.Loggable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -71,6 +72,8 @@ public class CustomerInfoController {
                     )
             }
     )
+
+    @Loggable(value = "Endpoint principal BFF", includeArgs = true)
     public Mono<ResponseEntity<CustomerInfoResponse>> getCustomerInfo(
             @Parameter(description = "Código único del cliente (encriptado)", required = true)
             @PathVariable @NotBlank String codigoUnico,
@@ -103,6 +106,7 @@ public class CustomerInfoController {
     /**
      * Maneja errores y devuelve respuestas apropiadas
      */
+    @Loggable(value = "Manejo de error en BFF", includeArgs = true, includeResult = true)
     private Mono<ResponseEntity<CustomerInfoResponse>> handleError(Throwable error, String correlationId, String path) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .correlationId(correlationId)

@@ -1,5 +1,6 @@
 package com.financial.products.controller;
 
+import com.financial.common.annotation.Loggable;
 import com.financial.products.dto.FinancialProductResponseDTO;
 import com.financial.products.service.FinancialProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,7 @@ public class FinancialProductController {
             summary = "Obtener productos financieros por cliente",
             description = "Busca y retorna todos los productos financieros asociados a un cliente"
     )
+    @Loggable(value = "Endpoint productos financieros", includeArgs = true)
     public Mono<ResponseEntity<List<FinancialProductResponseDTO>>> getProductsByCustomer(
             @Parameter(description = "Código único del cliente", required = true)
             @PathVariable String codigoUnico,

@@ -5,6 +5,7 @@ import com.financial.bff.client.FinancialProductsServiceClient;
 import com.financial.bff.dto.CustomerDTO;
 import com.financial.bff.dto.CustomerInfoResponse;
 import com.financial.bff.dto.FinancialProductDTO;
+import com.financial.common.annotation.Loggable;
 import com.financial.common.service.impl.EncryptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class CustomerInfoOrchestrationService {
      * Orquesta la obtención completa de información del cliente
      * Desencripta el código único y realiza llamadas paralelas a ambos microservicios
      */
+    @Loggable(value = "Orquestación de info cliente BFF", includeArgs = true, includeResult = false)
     public Mono<CustomerInfoResponse> getCustomerCompleteInfo(String encryptedCodigoUnico, String correlationId) {
         return Mono.deferContextual(ctx -> {
             log.info("Starting customer info orchestration with correlation-id: {}", correlationId);
