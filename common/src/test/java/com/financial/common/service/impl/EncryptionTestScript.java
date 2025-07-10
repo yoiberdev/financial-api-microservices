@@ -1,6 +1,8 @@
 package com.financial.common.service.impl;
 
 
+import com.financial.common.service.AESEncryptionService;
+
 /**
  * Script temporal para generar códigos únicos encriptados para testing
  * Usar este script para obtener versiones encriptadas de códigos únicos

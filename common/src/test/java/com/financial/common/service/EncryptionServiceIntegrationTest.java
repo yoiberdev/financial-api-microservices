@@ -2,6 +2,7 @@ package com.financial.common.service;
 
 import com.financial.common.config.EncryptionConfiguration;
 import com.financial.common.exception.EncryptionException;
+import com.financial.common.service.impl.EncryptionService;
 import com.financial.common.service.impl.EnhancedAESEncryptionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

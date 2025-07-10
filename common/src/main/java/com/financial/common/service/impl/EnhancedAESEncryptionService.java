@@ -1,13 +1,10 @@
 package com.financial.common.service.impl;
 
 import com.financial.common.exception.EncryptionException;
-import com.financial.common.service.EncryptionService;
 import com.financial.common.service.ValidationService;
 import com.financial.common.util.EncryptionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -17,8 +14,8 @@ import java.util.Base64;
 /**
  * Enhanced AES implementation with URL-safe Base64 encoding
  */
-@Service
-@Primary
+//@Service
+//@Primary
 @Slf4j
 public class EnhancedAESEncryptionService implements EncryptionService {
 

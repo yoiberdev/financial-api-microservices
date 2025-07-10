@@ -1,7 +1,7 @@
 package com.financial.common.service.impl;
 
 import com.financial.common.exception.EncryptionException;
-import com.financial.common.service.EncryptionService;
+import com.financial.common.service.AESEncryptionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

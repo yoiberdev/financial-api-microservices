@@ -1,7 +1,7 @@
 com\financial\common\util\EncryptionUtils.class
-com\financial\common\service\impl\AESEncryptionService.class
+com\financial\common\service\impl\EncryptionService.class
 com\financial\common\service\ValidationService.class
 com\financial\common\exception\EncryptionException.class
 com\financial\common\config\EncryptionConfiguration.class
-com\financial\common\service\EncryptionService.class
+com\financial\common\service\AESEncryptionService.class
 com\financial\common\service\impl\EnhancedAESEncryptionService.class

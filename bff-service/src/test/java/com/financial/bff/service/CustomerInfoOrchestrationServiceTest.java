@@ -5,7 +5,7 @@ import com.financial.bff.client.FinancialProductsServiceClient;
 import com.financial.bff.dto.CustomerDTO;
 import com.financial.bff.dto.CustomerInfoResponse;
 import com.financial.bff.dto.FinancialProductDTO;
-import com.financial.common.service.EncryptionService;
+import com.financial.common.service.impl.EncryptionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

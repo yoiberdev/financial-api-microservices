@@ -1,7 +1,7 @@
 package com.financial.common.config;
 
-import com.financial.common.service.EncryptionService;
-import com.financial.common.service.impl.AESEncryptionService;
+import com.financial.common.service.impl.EncryptionService;
+import com.financial.common.service.AESEncryptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
