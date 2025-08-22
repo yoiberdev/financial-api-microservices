@@ -100,7 +100,7 @@ public class EncryptionTestUtility {
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
 
         byte[] encrypted = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(encrypted);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(encrypted);
     }
 
     public static String decrypt(String encryptedData) throws Exception {
@@ -109,7 +109,7 @@ public class EncryptionTestUtility {
                 SECRET_KEY.getBytes(StandardCharsets.UTF_8), "AES");
         cipher.init(Cipher.DECRYPT_MODE, keySpec);
 
-        byte[] decoded = Base64.getDecoder().decode(encryptedData);
+        byte[] decoded = Base64.getUrlDecoder().decode(encryptedData);
         byte[] decrypted = cipher.doFinal(decoded);
         return new String(decrypted, StandardCharsets.UTF_8);
     }

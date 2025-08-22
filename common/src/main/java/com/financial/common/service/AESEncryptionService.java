@@ -4,6 +4,7 @@ import com.financial.common.exception.EncryptionException;
 import com.financial.common.service.impl.EncryptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Service
+@Primary
 @Slf4j
 public class AESEncryptionService implements EncryptionService {
 

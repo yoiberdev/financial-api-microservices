@@ -16,7 +16,7 @@ public class SecurityConfig {
      * Configuración de seguridad para desarrollo - Sin autenticación
      */
     @Bean
-    @Profile({"dev", "default"})
+    @Profile({"dev", "default", "docker"})
     public SecurityWebFilterChain devSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .cors(ServerHttpSecurity.CorsSpec::disable)

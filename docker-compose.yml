@@ -35,7 +35,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: dev
       # 🔗 Conexión R2DBC a PostgreSQL
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/financial_db
       SPRING_R2DBC_USERNAME: admin
@@ -74,7 +74,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: dev
       # Conexión R2DBC a PostgreSQL
       SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/financial_db
       SPRING_R2DBC_USERNAME: admin
@@ -113,7 +113,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: dev
       # URLs de microservicios internos
       SERVICES_CUSTOMER_BASE_URL: http://customer-service:8081
       SERVICES_FINANCIAL_PRODUCTS_BASE_URL: http://financial-products-service:8082

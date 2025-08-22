@@ -15,7 +15,7 @@ RUN addgroup -g 1001 -S financial && \
 
 # Variables de entorno optimizadas
 ENV JAVA_OPTS="-Xmx512m -Xms256m -XX:+UseG1GC -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom"
-ENV SPRING_PROFILES_ACTIVE=docker
+ENV SPRING_PROFILES_ACTIVE=dev
 
 # Directorio de trabajo
 WORKDIR /app
