@@ -11,7 +11,7 @@ Reto técnico para crear una API segura de clientes y productos financieros usan
 
 ### 1. Clonar y compilar
 ```bash
-git clone [repository-url]
+git clone https://github.com/yoiberdev/financial-api-microservices.git
 cd financial-api-microservices
 
 # Compilar todos los servicios
