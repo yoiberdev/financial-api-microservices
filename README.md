@@ -1,5 +1,34 @@
 # Financial API Microservices
 
+## Demo en vivo
+
+**https://financial-api-demo-164532276262.us-central1.run.app**
+
+Alojada en Google Cloud Run (region us-central1, escala a cero) con la base de
+datos en Neon. La pagina de inicio explica el flujo y trae los codigos ya
+cifrados para probar.
+
+Sin autenticacion. Rutas utiles:
+
+```
+GET /health                              estado del BFF
+GET /api/demo/customers                  codigos de cliente ya cifrados
+GET /api/customer-info/{codigoCifrado}   el flujo completo
+```
+
+El endpoint principal descifra el codigo, llama en paralelo a los dos
+microservicios internos y compone la respuesta con los datos del cliente y sus
+productos financieros. La cabecera `Correlation-ID` de la respuesta coincide
+con el `correlationId` del cuerpo, que es como se sigue una peticion por los
+tres servicios.
+
+Los tres microservicios corren dentro del mismo contenedor: el BFF escucha en
+el puerto publico y los otros dos en local, sin exponerse. Los datos son
+ficticios. La primera carga tras un rato tarda unos segundos por el arranque
+en frio.
+
+
+
 Reto técnico para crear una API segura de clientes y productos financieros usando Java 17, Spring Boot, WebFlux, OAuth2, AOP y Docker.
 
 ## 🌐 Demo pública (Cloud Run)

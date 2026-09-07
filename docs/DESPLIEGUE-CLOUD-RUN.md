@@ -1,5 +1,11 @@
 # Despliegue en Google Cloud Run
 
+> **Ya desplegada:** https://financial-api-demo-164532276262.us-central1.run.app
+> Proyecto de Google Cloud `sysrrhh-demo`, servicio `financial-api-demo`,
+> region `us-central1`. Base de datos `finapi` en Neon, con 1 GiB de memoria
+> porque son tres procesos Java en un contenedor.
+> Esta guia documenta como se hizo y como repetirlo.
+
 Guia para publicar este repositorio como **demo publica** en Cloud Run con PostgreSQL gestionado
 (Neon). La demo es de **solo lectura** y con **datos ficticios**.
 
