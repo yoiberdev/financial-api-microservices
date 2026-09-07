@@ -12,7 +12,7 @@
 # alguien habia ejecutado "mvn package" a mano previamente. Esta build es autocontenida.
 
 # ---------- etapa de compilacion ----------
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 
 WORKDIR /build
 
@@ -32,7 +32,7 @@ ARG SKIP_TESTS=true
 RUN mvn -B -ntp -DskipTests=${SKIP_TESTS} clean package
 
 # ---------- etapa de ejecucion ----------
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 # Sin Maven, sin JDK, sin codigo fuente y sin dependencias de test.
 RUN addgroup -g 1001 -S financial \
