@@ -1,0 +1,16 @@
+# Perfil prod: resource server OAuth2 real.
+#
+# Las propiedades del emisor NO se declaran con un valor por defecto a proposito. Si
+# spring.security.oauth2.resourceserver.jwt.issuer-uri esta presente, Spring Boot crea el
+# ReactiveJwtDecoder durante el arranque y descarga la metadata del emisor: con el antiguo valor
+# por defecto (Keycloak en localhost:9000) el contexto no levantaba si no habia Keycloak.
+#
+# Al desplegar con SPRING_PROFILES_ACTIVE=prod hay que pasar una de estas variables de entorno:
+#   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=https://<emisor>
+#   SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI=https://<emisor>/protocol/openid-connect/certs
+# (jwk-set-uri evita la descarga de metadata en el arranque)
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:INFO}
+    com.financial.bff: ${LOGGING_LEVEL_COM_FINANCIAL:INFO}
+    org.springframework.web.reactive.function.client: ${LOGGING_LEVEL_WEBCLIENT:INFO}

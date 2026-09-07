@@ -23,16 +23,16 @@ public class PerformanceAspect {
 
             // Log warning si el método tarda más de 1 segundo
             if (milliseconds > 1000) {
-                log.warn("PERFORMANCE WARNING: Método {} tardó {:.2f}ms", methodName, milliseconds);
+                log.warn("PERFORMANCE WARNING: Metodo {} tardo {} ms", methodName, String.format("%.2f", milliseconds));
             } else {
-                log.debug("Performance: Método {} ejecutado en {:.2f}ms", methodName, milliseconds);
+                log.debug("Performance: Metodo {} ejecutado en {} ms", methodName, String.format("%.2f", milliseconds));
             }
 
             return result;
         } catch (Exception e) {
             long executionTime = System.nanoTime() - startTime;
             double milliseconds = executionTime / 1_000_000.0;
-            log.error("Error en método {} después de {:.2f}ms", methodName, milliseconds);
+            log.error("Error en metodo {} despues de {} ms", methodName, String.format("%.2f", milliseconds));
             throw e;
         }
     }

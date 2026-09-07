@@ -3,26 +3,29 @@ package com.financial.common.service;
 import com.financial.common.exception.EncryptionException;
 import com.financial.common.service.impl.EncryptionService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-@Service
-@Primary
+/**
+ * Implementacion AES basica (sin ValidationService).
+ *
+ * NO es un bean de Spring: antes llevaba {@code @Service @Primary} igual que
+ * {@link com.financial.common.service.impl.EnhancedAESEncryptionService}, lo que dejaba dos
+ * candidatos @Primary del mismo tipo y hacia fallar el arranque con
+ * NoUniqueBeanDefinitionException. Se registra a demanda desde
+ * {@link com.financial.common.config.EncryptionConfiguration} con
+ * encryption.aes.implementation=basic.
+ */
 @Slf4j
 public class AESEncryptionService implements EncryptionService {
 
     private final String secretKey;
     private final String algorithm;
 
-    public AESEncryptionService(
-            @Value("${encryption.aes.secret-key}") String secretKey,
-            @Value("${encryption.aes.algorithm:AES/ECB/PKCS5Padding}") String algorithm) {
+    public AESEncryptionService(String secretKey, String algorithm) {
         this.secretKey = secretKey;
         this.algorithm = algorithm;
         validateKey();

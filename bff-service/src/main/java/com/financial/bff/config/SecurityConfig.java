@@ -13,10 +13,14 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class SecurityConfig {
 
     /**
-     * Configuración de seguridad para desarrollo - Sin autenticación
+     * Configuracion de seguridad para desarrollo y para la demo publica - Sin autenticacion.
+     *
+     * El perfil "demo" se anade aqui a proposito: si un perfil activo no tiene ninguna
+     * SecurityWebFilterChain declarada, Spring Security aplica su cadena por defecto y toda la
+     * aplicacion queda detras de un basic auth con contrasena generada en el arranque.
      */
     @Bean
-    @Profile({"dev", "default", "docker"})
+    @Profile({"dev", "default", "docker", "demo"})
     public SecurityWebFilterChain devSecurityFilterChain(ServerHttpSecurity http) {
         return http
                 .cors(ServerHttpSecurity.CorsSpec::disable)
@@ -27,7 +31,8 @@ public class SecurityConfig {
     }
 
     /**
-     * Configuración de seguridad para producción - Con OAuth2
+     * Configuracion de seguridad para produccion - Con OAuth2.
+     * Requiere un emisor OIDC accesible; las propiedades viven en application-prod.yml.
      */
     @Bean
     @Profile("prod")
@@ -36,7 +41,8 @@ public class SecurityConfig {
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/health", "/actuator/**", "/v3/api-docs/**", "/swagger-ui/**", "/webjars/**").permitAll()
+                        .pathMatchers("/", "/index.html", "/assets/**", "/favicon.ico").permitAll()
+                        .pathMatchers("/health", "/actuator/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/webjars/**").permitAll()
                         .pathMatchers("/api/customer-info/**").authenticated()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtDecoder(jwtDecoder)))

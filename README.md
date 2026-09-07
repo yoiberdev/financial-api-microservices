@@ -2,6 +2,24 @@
 
 Reto técnico para crear una API segura de clientes y productos financieros usando Java 17, Spring Boot, WebFlux, OAuth2, AOP y Docker.
 
+## 🌐 Demo pública (Cloud Run)
+
+Hay una imagen única que arranca los tres microservicios en un solo contenedor y sirve, en el
+mismo origen, una página de demo (`/`), la API (`/api/...`) y Swagger UI. Pasos, variables y
+comprobaciones: **[docs/DESPLIEGUE-CLOUD-RUN.md](docs/DESPLIEGUE-CLOUD-RUN.md)**.
+
+```bash
+docker build -t financial-api:demo .
+docker run --rm -p 127.0.0.1:8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=demo -e APP_MODULE=all \
+  -e SPRING_R2DBC_URL='r2dbc:postgresql://TU_HOST:5432/financial_db?sslMode=require' \
+  -e SPRING_R2DBC_USERNAME=usuario -e SPRING_R2DBC_PASSWORD=secreto \
+  financial-api:demo
+```
+
+La demo es **de solo lectura, sin login y con datos inventados** (clientes "Demo", documentos
+`1000000x`, cuentas `DEMO-xxxx-xxxx`).
+
 ## 🚀 Ejecución del Proyecto con Docker
 
 ### Prerrequisitos
@@ -9,24 +27,23 @@ Reto técnico para crear una API segura de clientes y productos financieros usan
 - Java 17+ (para compilación local)
 - Maven 3.8+ (para compilación local)
 
-### 1. Clonar y compilar
+### 1. Clonar
 ```bash
 git clone https://github.com/yoiberdev/financial-api-microservices.git
 cd financial-api-microservices
+```
 
-# Compilar todos los servicios
+No hace falta compilar antes: el `Dockerfile` de la raíz es multietapa y hace el `mvn package`
+dentro de la imagen. Para compilar en local de todas formas:
+
+```bash
 mvn clean package -DskipTests
-
-# O compilar individualmente si es necesario
-cd bff-service && mvn clean package -DskipTests && cd ..
-cd customer-service && mvn clean package -DskipTests && cd ..
-cd financial-products-service && mvn clean package -DskipTests && cd ..
 ```
 
 ### 2. Ejecutar con Docker Compose
 ```bash
-# Levantar todos los servicios
-docker-compose up -d
+# Levantar todos los servicios (construye la imagen única)
+docker compose up -d --build
 
 # Ver logs de todos los servicios
 docker-compose logs -f
@@ -40,10 +57,13 @@ Los servicios estarán disponibles en:
 
 | Servicio | Puerto | Health Check |
 |----------|--------|-------------|
-| **BFF Service** | 8080 | http://localhost:8080/actuator/health |
-| **Customer Service** | 8081 | http://localhost:8081/actuator/health |
-| **Financial Products Service** | 8082 | http://localhost:8082/actuator/health |
-| **PostgreSQL** | 5433 | - |
+| **BFF Service** | 8080 (127.0.0.1) | http://localhost:8080/actuator/health |
+| **Customer Service** | interno de la red `financial-network` | - |
+| **Financial Products Service** | interno de la red `financial-network` | - |
+| **PostgreSQL** | 5433 (127.0.0.1) | - |
+
+Solo el BFF se publica al host, y únicamente en `127.0.0.1`. Los otros dos servicios se
+alcanzan por el nombre de servicio dentro de la red de compose.
 
 ### 4. Detener servicios
 ```bash
@@ -102,16 +122,17 @@ Los siguientes códigos están preconfigurados en la colección:
 
 | Servicio | Swagger UI | OpenAPI JSON |
 |----------|------------|--------------|
-| **Customer Service** | http://localhost:8081/swagger-ui.html | http://localhost:8081/v3/api-docs |
-| **Financial Products Service** | http://localhost:8082/swagger-ui.html | http://localhost:8082/v3/api-docs |
-| **BFF Service** | ❌ No disponible | ❌ No disponible |
+| **BFF Service** | http://localhost:8080/swagger-ui.html | http://localhost:8080/v3/api-docs |
+| **Customer Service** | `/swagger-ui.html` del contenedor | `/v3/api-docs` |
+| **Financial Products Service** | `/swagger-ui.html` del contenedor | `/v3/api-docs` |
 
-### ¿Por qué el BFF no tiene Swagger público?
+El Swagger del BFF sí funciona. Antes `/v3/api-docs` se quedaba colgado: springdoc 2.3.0 apunta a
+Spring Boot 3.2 y con Spring Framework 6.2 lanza `NoSuchMethodError` en cuanto la aplicación
+tiene un `@RestControllerAdvice`. Se ha subido a la línea 2.8.x.
 
-El BFF Service requiere **autenticación OAuth2** y maneja **códigos únicos encriptados**, por lo que:
-- Swagger UI no puede funcionar sin token válido
-- Los endpoints requieren códigos encriptados específicos
-- Se debe usar **Postman** para testing del BFF
+En los perfiles `dev`, `docker` y `demo` el BFF no exige token, así que se puede probar desde
+Swagger UI. Los códigos cifrados de ejemplo están en `GET /api/demo/customers` (con
+`DEMO_ENABLED=true`).
 
 ## 🧪 Pruebas Unitarias
 
@@ -147,7 +168,10 @@ financial-microservices/
 ├── customer-service/         # Microservicio de clientes
 ├── financial-products-service/ # Microservicio de productos
 ├── common/                   # Utilidades compartidas
-├── init-db/                  # Scripts SQL de inicialización
+├── init-db/                  # Scripts SQL de inicialización (docker compose)
+├── docker/entrypoint.sh      # Selector de módulo de la imagen única
+├── docs/                     # Guía de despliegue en Cloud Run
+├── Dockerfile                # Imagen única multietapa (los 3 servicios)
 ├── docker-compose.yml        # Orquestación de servicios
 └── Financial-API-BFF-Orchestration.postman_collection.json
 ```
@@ -170,7 +194,7 @@ financial-microservices/
 - Resource Server configurado para validación JWT
 
 ### Tracking distribuido
-- **Correlation-ID**: Header `X-Correlation-ID` para trazabilidad
+- **Correlation-ID**: Header `Correlation-ID` para trazabilidad (petición y respuesta)
 - Propagación automática entre microservicios
 - Logging estructurado con ID de correlación
 
@@ -240,7 +264,7 @@ ENCRYPTION_ALGORITHM=AES/ECB/PKCS5Padding
 # Base de datos
 SPRING_R2DBC_URL=r2dbc:postgresql://localhost:5433/financial_db
 SPRING_R2DBC_USERNAME=admin
-SPRING_R2DBC_PASSWORD=perupcs123
+SPRING_R2DBC_PASSWORD=Demo1234!   # solo entorno local, ver docker-compose.yml
 
 # Microservicios URLs
 SERVICES_CUSTOMER_BASE_URL=http://localhost:8081
@@ -248,8 +272,10 @@ SERVICES_FINANCIAL_PRODUCTS_BASE_URL=http://localhost:8082
 ```
 
 ### Profiles disponibles
-- **dev**: Desarrollo local
-- **docker**: Contenedores Docker
+- **dev**: Desarrollo local (sin autenticación)
+- **docker**: Contenedores Docker con `docker compose` (sin autenticación)
+- **demo**: Demo pública: seguridad permisiva, seed idempotente y `/api/demo/customers`
+- **prod**: OAuth2 resource server real (requiere emisor OIDC, ver `application-prod.yml`)
 - **test**: Ejecución de tests
 
 ## 📈 Monitoreo y Observabilidad

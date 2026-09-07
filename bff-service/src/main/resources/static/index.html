@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Financial API · Demo BFF</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --border: #e2e5ea;
+    --text: #14181f;
+    --muted: #5c6672;
+    --accent: #1d5fd8;
+    --accent-soft: #e8effc;
+    --code-bg: #0f1524;
+    --code-text: #d6e0f5;
+    --ok: #147a4b;
+    --warn: #9a5b00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116;
+      --surface: #161b23;
+      --border: #262d38;
+      --text: #e7ecf3;
+      --muted: #9aa5b4;
+      --accent: #6ea1ff;
+      --accent-soft: #1a2740;
+      --code-bg: #0a0e17;
+      --code-text: #cbd8f0;
+      --ok: #4ec98a;
+      --warn: #e0a33c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px 64px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 28px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 16px; margin: 32px 0 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+  p { margin: 0 0 12px; }
+  .lead { color: var(--muted); max-width: 65ch; }
+  .badge {
+    display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent); font-weight: 600; margin-left: 8px;
+    vertical-align: middle;
+  }
+  .flow {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; font-size: 13px; color: var(--muted);
+  }
+  .node { background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 4px 10px; font-weight: 600; }
+  .arrow { opacity: .55; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; text-align: left; cursor: pointer; font: inherit; color: inherit;
+    transition: border-color .12s ease, transform .12s ease;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card .code { font-weight: 700; font-size: 15px; }
+  .card .enc {
+    display: block; margin-top: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px; color: var(--muted); word-break: break-all;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+  button.plain {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 14px; font: inherit; color: inherit; cursor: pointer;
+  }
+  button.plain:hover { border-color: var(--accent); }
+  .meta { font-size: 13px; color: var(--muted); margin-bottom: 8px; min-height: 20px; }
+  .status-ok { color: var(--ok); font-weight: 600; }
+  .status-err { color: var(--warn); font-weight: 600; }
+  pre {
+    background: var(--code-bg); color: var(--code-text); border-radius: 10px; padding: 16px;
+    overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px; line-height: 1.5; margin: 0;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  td code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+  a { color: var(--accent); }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Financial API · BFF<span class="badge">demo</span></h1>
+    <p class="lead">
+      Demo publica de un reto tecnico en Java 17 / Spring Boot 3.5 reactivo. El BFF recibe el
+      codigo de cliente <strong>cifrado en AES</strong>, lo descifra y llama en paralelo
+      (<code>Mono.zip</code>) a dos microservicios sobre PostgreSQL con R2DBC. Datos ficticios,
+      solo lectura.
+    </p>
+  </header>
+
+  <div class="flow">
+    <span class="node">Navegador</span><span class="arrow">→</span>
+    <span class="node">bff-service</span><span class="arrow">→ Mono.zip →</span>
+    <span class="node">customer-service</span>
+    <span class="node">financial-products-service</span>
+    <span class="arrow">→</span>
+    <span class="node">PostgreSQL (R2DBC)</span>
+  </div>
+
+  <h2>1 · Clientes de demo</h2>
+  <p class="lead">
+    Cada tarjeta lleva el codigo cifrado que espera el BFF. Al pulsarla se llama a
+    <code>GET /api/customer-info/{codigoCifrado}</code>.
+  </p>
+  <div class="grid" id="customers">Cargando…</div>
+
+  <h2>2 · Respuesta</h2>
+  <div class="row">
+    <button class="plain" id="btn-404">Probar ruta de API inexistente</button>
+    <button class="plain" id="btn-health">Ver /health</button>
+  </div>
+  <div class="meta" id="meta"></div>
+  <pre id="out">Elige un cliente para lanzar una llamada.</pre>
+
+  <h2>3 · Enlaces</h2>
+  <table>
+    <tr><th>Recurso</th><th>Ruta</th></tr>
+    <tr><td>Swagger UI del BFF</td><td><a href="/swagger-ui.html">/swagger-ui.html</a></td></tr>
+    <tr><td>OpenAPI JSON</td><td><a href="/v3/api-docs">/v3/api-docs</a></td></tr>
+    <tr><td>Health del BFF</td><td><a href="/actuator/health">/actuator/health</a></td></tr>
+    <tr><td>Codigos cifrados de demo</td><td><a href="/api/demo/customers">/api/demo/customers</a></td></tr>
+    <tr><td>Endpoint principal</td><td><code>/api/customer-info/{codigoCifrado}</code></td></tr>
+  </table>
+
+  <footer>
+    Los microservicios <code>customer-service</code> y <code>financial-products-service</code>
+    escuchan solo en <code>127.0.0.1</code> dentro del contenedor y no estan publicados.
+    Cabecera <code>Correlation-ID</code> propagada por el contexto de Reactor en toda la cadena.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var out = document.getElementById('out');
+  var meta = document.getElementById('meta');
+  var grid = document.getElementById('customers');
+
+  function show(status, corr, body, ok) {
+    var cls = ok ? 'status-ok' : 'status-err';
+    meta.innerHTML = 'HTTP <span class="' + cls + '">' + status + '</span>' +
+      (corr ? ' · Correlation-ID <code>' + corr + '</code>' : '');
+    out.textContent = body;
+  }
+
+  function call(path) {
+    meta.textContent = 'Llamando ' + path + ' …';
+    out.textContent = '';
+    fetch(path, { headers: { 'Accept': 'application/json' } })
+      .then(function (res) {
+        var corr = res.headers.get('Correlation-ID');
+        return res.text().then(function (text) {
+          var body = text;
+          try { body = JSON.stringify(JSON.parse(text), null, 2); } catch (e) {}
+          if (!body) { body = '(sin cuerpo)'; }
+          show(res.status + ' ' + res.statusText, corr, body, res.ok);
+        });
+      })
+      .catch(function (err) { show('error de red', null, String(err), false); });
+  }
+
+  fetch('/api/demo/customers')
+    .then(function (r) { return r.json(); })
+    .then(function (list) {
+      grid.innerHTML = '';
+      list.forEach(function (item) {
+        var b = document.createElement('button');
+        b.className = 'card';
+        b.type = 'button';
+        b.innerHTML = '<span class="code">' + item.codigo + '</span>' +
+                      '<span class="enc">' + item.codigoCifrado + '</span>';
+        b.addEventListener('click', function () {
+          call('/api/customer-info/' + encodeURIComponent(item.codigoCifrado));
+        });
+        grid.appendChild(b);
+      });
+    })
+    .catch(function () {
+      grid.textContent = 'No se pudo cargar la lista de demo (¿perfil demo desactivado?).';
+    });
+
+  document.getElementById('btn-404')
+    .addEventListener('click', function () { call('/api/no-existe'); });
+  document.getElementById('btn-health')
+    .addEventListener('click', function () { call('/health'); });
+})();
+</script>
+</body>
+</html>

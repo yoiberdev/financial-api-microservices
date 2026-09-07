@@ -1,0 +1,26 @@
+# Perfil "demo" de financial-products-service.
+# No ejecuta DDL ni seed: el esquema y los datos los crea customer-service al arrancar.
+spring:
+  sql:
+    init:
+      mode: never
+  r2dbc:
+    pool:
+      initial-size: ${R2DBC_POOL_INITIAL_SIZE:1}
+      max-size: ${R2DBC_POOL_MAX_SIZE:5}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:INFO}
+    com.financial.products: ${LOGGING_LEVEL_COM_FINANCIAL:INFO}
+    org.springframework.r2dbc: WARN
+    io.r2dbc.postgresql.QUERY: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

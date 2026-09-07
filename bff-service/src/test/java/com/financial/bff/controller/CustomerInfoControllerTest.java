@@ -1,5 +1,6 @@
 package com.financial.bff.controller;
 
+import com.financial.bff.config.TestSecurityConfig;
 import com.financial.bff.dto.CustomerInfoResponse;
 import com.financial.bff.dto.FinancialProductDTO;
 import com.financial.bff.service.CustomerInfoOrchestrationService;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -26,8 +28,12 @@ import static org.mockito.Mockito.when;
 /**
  * Tests de integración para CustomerInfoController
  */
+// TestSecurityConfig hay que importarlo explicitamente: @WebFluxTest no carga las @Configuration
+// de la aplicacion, asi que sin el se aplica la cadena por defecto de Spring Security y todas
+// las peticiones responden 401.
 @WebFluxTest(CustomerInfoController.class)
 @ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 @DisplayName("Customer Info Controller Integration Tests")
 class CustomerInfoControllerTest {
 

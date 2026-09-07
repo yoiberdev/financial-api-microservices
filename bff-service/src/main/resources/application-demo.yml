@@ -1,0 +1,20 @@
+# Perfil "demo": demo publica de solo lectura (Cloud Run + PostgreSQL gestionado).
+# Sin OAuth2: la cadena de seguridad permisiva de SecurityConfig cubre el perfil demo.
+demo:
+  enabled: true
+  codigos: ${DEMO_CODIGOS:CUST001,CUST002,CUST003,CUST004,CUST005}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:INFO}
+    com.financial.bff: ${LOGGING_LEVEL_COM_FINANCIAL:INFO}
+    org.springframework.web.reactive.function.client: ${LOGGING_LEVEL_WEBCLIENT:WARN}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ${ACTUATOR_EXPOSE:health,info}
+  endpoint:
+    health:
+      show-details: never

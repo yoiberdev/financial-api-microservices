@@ -1,0 +1,33 @@
+# Perfil "demo" de customer-service.
+#
+# Este servicio es el que arranca PRIMERO en el contenedor de la demo, asi que es el que crea el
+# esquema y carga los datos ficticios (ambas tablas). Los scripts son idempotentes:
+# CREATE TABLE IF NOT EXISTS + INSERT ... ON CONFLICT DO NOTHING, asi que se pueden ejecutar en
+# cada arranque sin duplicar nada. financial-products-service NO ejecuta DDL para evitar carreras.
+spring:
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:always}
+      schema-locations: classpath:db/demo-schema.sql
+      data-locations: classpath:db/demo-seed.sql
+      continue-on-error: false
+  r2dbc:
+    pool:
+      initial-size: ${R2DBC_POOL_INITIAL_SIZE:1}
+      max-size: ${R2DBC_POOL_MAX_SIZE:5}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL_ROOT:INFO}
+    com.financial.customer: ${LOGGING_LEVEL_COM_FINANCIAL:INFO}
+    org.springframework.r2dbc: WARN
+    io.r2dbc.postgresql.QUERY: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

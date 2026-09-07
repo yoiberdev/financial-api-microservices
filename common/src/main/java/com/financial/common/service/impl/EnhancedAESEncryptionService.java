@@ -5,6 +5,7 @@ import com.financial.common.service.ValidationService;
 import com.financial.common.util.EncryptionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Enhanced AES implementation with URL-safe Base64 encoding
+ * Enhanced AES implementation with URL-safe Base64 encoding.
+ * Implementacion por defecto; se desactiva con encryption.aes.implementation=basic.
  */
 @Service
 @Primary
+@ConditionalOnProperty(prefix = "encryption.aes", name = "implementation",
+        havingValue = "enhanced", matchIfMissing = true)
 @Slf4j
 public class EnhancedAESEncryptionService implements EncryptionService {
 

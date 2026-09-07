@@ -1,6 +1,11 @@
 .env
 /.idea
-/docker
+.idea/
+
+# Salidas de Maven (common/target estaba versionado por error)
+target/
+*/target/
+**/target/
 
 # Compiled class file
 *.class
@@ -12,7 +17,6 @@
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-.idea/
 
 # Package Files #
 *.jar

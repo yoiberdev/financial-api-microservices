@@ -1,9 +1,36 @@
-# Maven
+# Contexto de build de la imagen unica (Dockerfile en la raiz).
+# Todo lo que compila lo hace Maven dentro de la etapa "build": nada de artefactos locales.
+
+# Salidas de compilacion (si entran, la etapa de build puede reutilizar clases viejas)
+target/
+*/target/
+**/target/
+*.jar
+*.war
+
+# Caches de herramientas que provocan builds incrementales incompletos
+*.tsbuildinfo
+**/*.tsbuildinfo
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+
+# Control de versiones y CI
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Maven wrapper y ajustes locales
 .mvn/
+**/.mvn/
 mvnw
 mvnw.cmd
-target/*/
-!target/*.jar
+**/mvnw
+**/mvnw.cmd
 
 # IDE
 .idea/
@@ -12,38 +39,29 @@ target/*/
 *.ipr
 *.iws
 
-# Logs
-*.log
-logs/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Git
-.git/
-.gitignore
-
-# Docker
+# Docker y compose (la imagen no se construye a si misma)
 Dockerfile
+*/Dockerfile
 .dockerignore
 docker-compose*.yml
 
-# Testing
-src/test/
-
-# Documentation
-README.md
+# Documentacion y coleccion de Postman
 docs/
+README.md
+LICENSE
+*.postman_collection.json
 
-# Environment files
+# Entornos y secretos
 .env
-.env.local
-.env.development
-.env.production
+.env.*
+!.env.example
 
-# Temporary files
+# Logs y temporales
+*.log
+logs/
 *.tmp
 *.temp
 *.swp
 *.swo
+.DS_Store
+Thumbs.db

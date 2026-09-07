@@ -30,10 +30,17 @@ public class CorrelationIdFilter implements WebFilter {
         log.debug("Processing request with correlation-id: {}", correlationId);
 
         // Agregar correlation ID al response header
-        exchange.getResponse().getHeaders().add(CORRELATION_ID_HEADER, correlationId);
+        exchange.getResponse().getHeaders().set(CORRELATION_ID_HEADER, correlationId);
+
+        // El correlation ID generado aqui tambien se inyecta en la peticion: sin esto el
+        // @RequestHeader("Correlation-ID") del controlador llegaba vacio y generaba OTRO UUID,
+        // de modo que la cabecera de respuesta y el correlationId del cuerpo no coincidian.
+        ServerWebExchange mutated = exchange.mutate()
+                .request(request -> request.headers(headers -> headers.set(CORRELATION_ID_HEADER, correlationId)))
+                .build();
 
         // Propagar correlation ID en el contexto de Reactor
-        return chain.filter(exchange)
+        return chain.filter(mutated)
                 .contextWrite(Context.of(CORRELATION_ID_CONTEXT_KEY, correlationId));
     }
 

@@ -1,17 +1,18 @@
 package com.financial.bff;
 
-import com.financial.common.config.EncryptionConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 
-@SpringBootApplication
-@ComponentScan(basePackages = {
+/**
+ * El escaneo de com.financial.common se declara con scanBasePackages y NO con un
+ * {@code @ComponentScan} aparte: un {@code @ComponentScan} propio pierde los excludeFilters de
+ * {@code @SpringBootApplication} (TypeExcludeFilter), asi que los tests de slice como
+ * {@code @WebFluxTest} acababan levantando todos los @Service del proyecto.
+ */
+@SpringBootApplication(scanBasePackages = {
 		"com.financial.bff",
 		"com.financial.common"
 })
-@Import(EncryptionConfiguration.class)
 public class BffServiceApplication {
 
 	public static void main(String[] args) {

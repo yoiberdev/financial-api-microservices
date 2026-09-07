@@ -1,19 +1,20 @@
+# Cloud Run inyecta PORT; en local se usa 8080.
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
     name: bff-service
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:9000/realms/financial}
   webflux:
     multipart:
       max-in-memory-size: ${WEBFLUX_MAX_IN_MEMORY_SIZE:10MB}
+
+# OJO: spring.security.oauth2.resourceserver.jwt.issuer-uri NO se declara aqui.
+# Si esa propiedad existe, Spring Boot crea el ReactiveJwtDecoder al arrancar y descarga la
+# metadata del emisor; con el valor por defecto (Keycloak en localhost:9000) el contexto no
+# levantaba si no habia Keycloak. Vive solo en application-prod.yml.
 
 # Configuración de cifrado
 encryption:
@@ -21,6 +22,8 @@ encryption:
     secret-key: ${ENCRYPTION_SECRET_KEY:MySecretKey12345}
     algorithm: ${ENCRYPTION_ALGORITHM:AES/ECB/PKCS5Padding}
     charset: ${ENCRYPTION_CHARSET:UTF-8}
+    # enhanced (por defecto) | basic
+    implementation: ${ENCRYPTION_IMPLEMENTATION:enhanced}
 
 # URLs de microservicios
 services:
@@ -29,12 +32,16 @@ services:
   financial-products:
     base-url: ${SERVICES_FINANCIAL_PRODUCTS_BASE_URL:http://localhost:8082}
 
+# Endpoints de apoyo de la demo publica (se activan en el perfil demo)
+demo:
+  enabled: ${DEMO_ENABLED:false}
+
 # Configuración de logging
 logging:
   level:
     root: ${LOGGING_LEVEL_ROOT:INFO}
     com.financial.bff: ${LOGGING_LEVEL_COM_FINANCIAL:DEBUG}
-    org.springframework.web.reactive.function.client: DEBUG
+    org.springframework.web.reactive.function.client: ${LOGGING_LEVEL_WEBCLIENT:DEBUG}
 
 # Configuración de Actuator
 management:

@@ -9,7 +9,9 @@ spring:
   r2dbc:
     url: ${SPRING_R2DBC_URL:r2dbc:postgresql://localhost:5433/financial_db}
     username: ${SPRING_R2DBC_USERNAME:admin}
-    password: ${SPRING_R2DBC_PASSWORD:perupcs123}
+    # Valor por defecto de desarrollo, el mismo que usa docker-compose.yml. Nunca poner aqui
+    # una credencial real: el repositorio es publico.
+    password: "${SPRING_R2DBC_PASSWORD:Demo1234!}"
     pool:
       initial-size: ${R2DBC_POOL_INITIAL_SIZE:5}
       max-size: ${R2DBC_POOL_MAX_SIZE:20}
@@ -22,6 +24,8 @@ encryption:
     secret-key: ${ENCRYPTION_SECRET_KEY:MySecretKey12345}
     algorithm: ${ENCRYPTION_ALGORITHM:AES/ECB/PKCS5Padding}
     charset: ${ENCRYPTION_CHARSET:UTF-8}
+    # enhanced (por defecto) | basic
+    implementation: ${ENCRYPTION_IMPLEMENTATION:enhanced}
 
 # Configuración de logging
 logging:
